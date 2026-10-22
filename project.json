@@ -1,0 +1,199 @@
+{
+	"contentrating" : "Everyone",
+	"description" : "Minimalist, high-performance cyberpunk cockpit hardware monitor for Wallpaper Engine. Automatically detects CPU, GPU, RAM, display resolution, and network bandwidth on any PC.",
+	"file" : "index.html",
+	"general" : 
+	{
+		"properties" : 
+		{
+			"setup_trigger" : 
+			{
+				"index" : 0,
+				"order" : 100,
+				"text" : "⚙️ Show Hardware Info & Setup Guide",
+				"type" : "bool",
+				"value" : false
+			},
+			"layout_mode" : 
+			{
+				"index" : 1,
+				"options" : 
+				[
+					{
+						"label" : "Centered Floating (Recommended · Desktop icons unobstructed)",
+						"value" : "centered"
+					},
+					{
+						"label" : "Compact Centered (Narrow)",
+						"value" : "compact"
+					},
+					{
+						"label" : "Fullscreen (Spans entire screen width)",
+						"value" : "fullscreen"
+					}
+				],
+				"order" : 101,
+				"text" : "Cockpit Layout",
+				"type" : "combo",
+				"value" : "centered"
+			},
+			"monochrome_mode" : 
+			{
+				"index" : 2,
+				"order" : 102,
+				"text" : "Monochrome Mode (Stealth Black & White)",
+				"type" : "bool",
+				"value" : true
+			},
+			"fps_limit" : 
+			{
+				"index" : 3,
+				"options" : 
+				[
+					{
+						"label" : "30 FPS (Ultra-Lightweight · ~1% CPU · Recommended)",
+						"value" : "30"
+					},
+					{
+						"label" : "60 FPS (Smooth · Standard)",
+						"value" : "60"
+					}
+				],
+				"order" : 103,
+				"text" : "Framerate Limit / CPU Usage",
+				"type" : "combo",
+				"value" : "30"
+			},
+			"schemecolor" : 
+			{
+				"order" : 104,
+				"text" : "Primary Accent Color (Pure White / Stealth)",
+				"type" : "color",
+				"value" : "1 1 1"
+			},
+			"hud_secondary_color" : 
+			{
+				"index" : 4,
+				"order" : 105,
+				"text" : "Secondary Accent Color (Platinum Silver)",
+				"type" : "color",
+				"value" : "0.85 0.85 0.85"
+			},
+			"hud_ram_color" : 
+			{
+				"index" : 5,
+				"order" : 106,
+				"text" : "RAM & Memory Color (White)",
+				"type" : "color",
+				"value" : "0.92 0.92 0.92"
+			},
+			"hud_pc_color" : 
+			{
+				"index" : 6,
+				"order" : 107,
+				"text" : "3D PC Hologram Wireframe Color",
+				"type" : "color",
+				"value" : "1 1 1"
+			},
+			"hud_bg_color" : 
+			{
+				"index" : 7,
+				"order" : 108,
+				"text" : "Background Color (Pitch Black)",
+				"type" : "color",
+				"value" : "0 0 0"
+			},
+			"show_starfield" : 
+			{
+				"index" : 8,
+				"order" : 109,
+				"text" : "Cosmic Starfield Background",
+				"type" : "bool",
+				"value" : true
+			},
+			"polling_rate" : 
+			{
+				"index" : 9,
+				"options" : 
+				[
+					{
+						"label" : "Relaxed (1000 ms · Recommended)",
+						"value" : "1000"
+					},
+					{
+						"label" : "Standard (500 ms)",
+						"value" : "500"
+					},
+					{
+						"label" : "Realtime (250 ms)",
+						"value" : "250"
+					}
+				],
+				"order" : 110,
+				"text" : "Telemetry Polling Rate",
+				"type" : "combo",
+				"value" : "1000"
+			},
+			"temp_unit" : 
+			{
+				"index" : 10,
+				"options" : 
+				[
+					{
+						"label" : "Celsius (°C)",
+						"value" : "celsius"
+					},
+					{
+						"label" : "Fahrenheit (°F)",
+						"value" : "fahrenheit"
+					}
+				],
+				"order" : 111,
+				"text" : "Temperature Unit",
+				"type" : "combo",
+				"value" : "celsius"
+			},
+			"cpu_name_override" : 
+			{
+				"index" : 11,
+				"order" : 112,
+				"text" : "CPU Model Label Override (Optional)",
+				"type" : "text",
+				"value" : ""
+			},
+			"gpu_name_override" : 
+			{
+				"index" : 12,
+				"order" : 113,
+				"text" : "GPU Model Label Override (Optional)",
+				"type" : "text",
+				"value" : ""
+			},
+			"network_display" : 
+			{
+				"index" : 13,
+				"order" : 114,
+				"text" : "Display Network Panel",
+				"type" : "bool",
+				"value" : true
+			},
+			"show_os_info" : 
+			{
+				"index" : 14,
+				"order" : 115,
+				"text" : "Display OS Info Bar",
+				"type" : "bool",
+				"value" : true
+			}
+		},
+		"supportsaudioprocessing" : true
+	},
+	"preview" : "preview.png",
+	"ratingsex" : "none",
+	"ratingviolence" : "none",
+	"tags" : [ "Technology" ],
+	"title" : "APEX: Universal PC Hardware Monitor",
+	"type" : "web",
+	"version" : 1,
+	"visibility" : "public"
+}

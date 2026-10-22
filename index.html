@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>APEX: Hardware Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="hud-canvas"></canvas>
+  <div id="scanlines" class="scanlines-layer"></div>
+
+  <div id="apex-setup-modal" style="display:none">
+    <div id="apex-setup-backdrop"></div>
+    <div id="apex-setup-box">
+
+      <div id="apex-setup-header">
+        <span id="apex-setup-icon">⚡</span>
+        <div>
+          <div id="apex-setup-title">APEX HARDWARE MONITOR</div>
+          <div id="apex-setup-subtitle">SYSTEM PROFILER &amp; TELEMETRY</div>
+        </div>
+        <button id="apex-setup-close" title="Close (ESC)">✕</button>
+      </div>
+
+      <div id="apex-setup-divider"></div>
+
+      <div class="apex-hw-card">
+        <div class="apex-hw-status">
+          <span class="apex-status-dot"></span>
+          <span>Hardware Detection Active</span>
+        </div>
+        <div class="apex-hw-grid">
+          <div class="apex-hw-item">
+            <span class="apex-hw-label">GPU:</span>
+            <span class="apex-hw-value" id="modal-gpu-val">Detecting…</span>
+          </div>
+          <div class="apex-hw-item">
+            <span class="apex-hw-label">CPU:</span>
+            <span class="apex-hw-value" id="modal-cpu-val">Detecting…</span>
+          </div>
+          <div class="apex-hw-item">
+            <span class="apex-hw-label">RAM:</span>
+            <span class="apex-hw-value" id="modal-ram-val">Detecting…</span>
+          </div>
+          <div class="apex-hw-item">
+            <span class="apex-hw-label">SYSTEM:</span>
+            <span class="apex-hw-value" id="modal-os-val">Detecting…</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="apex-setup-btn-done">
+        <span>✓</span>
+        <span>Hardware Verified — Close &amp; Continue</span>
+      </button>
+
+      <div id="apex-setup-divider2"></div>
+
+      <div id="apex-setup-advanced-toggle" onclick="apexToggleAdvanced()">
+        <span>🔧 Extended Windows Profiler &amp; Live Telemetry (Optional)</span>
+        <span id="apex-adv-arrow">▼</span>
+      </div>
+
+      <div id="apex-setup-advanced-content" style="display:none">
+        <div id="apex-setup-info">
+          Wallpaper Engine sandboxes web wallpapers for security. To run deep Windows hardware profiling or real-time Task Manager telemetry:
+        </div>
+        <div id="apex-setup-steps">
+          <div class="apex-step">
+            <span class="apex-step-num">1</span>
+            <span>Right-click this wallpaper in Wallpaper Engine → <strong>"Open in Explorer"</strong></span>
+          </div>
+          <div class="apex-step">
+            <span class="apex-step-num">2</span>
+            <span>Run <strong>update-hardware.bat</strong> (Reads exact motherboard model &amp; VRAM)</span>
+          </div>
+          <div class="apex-step">
+            <span class="apex-step-num">3</span>
+            <span>For 1:1 real-time Task Manager monitoring: Run <strong>start-live-telemetry.bat</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="apex-setup-footer">
+        <span id="apex-setup-auto-badge">● Ready · Plug &amp; Play</span>
+        <button id="apex-setup-dismiss">Close</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="hardware.js"></script>
+  <script src="telemetry.js"></script>
+  <script src="main.js"></script>
+
+  <script>
+    var _lastSetupTriggerVal = false;
+    var _userDismissedModal = false;
+
+    function updateModalHWInfo() {
+      try {
+        var h = window.HW || (window.CUSTOM_HARDWARE || {});
+        var gpuEl = document.getElementById('modal-gpu-val');
+        var cpuEl = document.getElementById('modal-cpu-val');
+        var ramEl = document.getElementById('modal-ram-val');
+        var osEl  = document.getElementById('modal-os-val');
+
+        if (gpuEl) {
+          gpuEl.textContent = (h.gpuName || 'GPU detected') + (h.gpuVramGB ? ' · ' + h.gpuVramGB + ' GB VRAM' : '');
+        }
+        if (cpuEl) {
+          cpuEl.textContent = (h.cpuName || 'CPU detected') + (h.cpuThreads ? ' (' + h.cpuThreads + 'T)' : '');
+        }
+        if (ramEl) {
+          ramEl.textContent = (h.ramGB || 8) + ' GB RAM';
+        }
+        if (osEl) {
+          osEl.textContent = (h.os || 'Windows') + (h.screenRes ? ' · ' + h.screenRes : '');
+        }
+      } catch(_) {}
+    }
+
+    function apexShowModal() {
+      var modal = document.getElementById('apex-setup-modal');
+      if (modal) {
+        updateModalHWInfo();
+        modal.style.display = 'flex';
+      }
+    }
+
+    function apexDismissSetup() {
+      var modal = document.getElementById('apex-setup-modal');
+      if (modal) modal.style.display = 'none';
+      _userDismissedModal = true;
+      try { localStorage.setItem('apex_setup_dismissed', '1'); } catch(_) {}
+    }
+
+    function apexToggleAdvanced() {
+      var content = document.getElementById('apex-setup-advanced-content');
+      var arrow = document.getElementById('apex-adv-arrow');
+      if (content) {
+        var isHidden = (content.style.display === 'none' || !content.style.display);
+        content.style.display = isHidden ? 'block' : 'none';
+        if (arrow) arrow.textContent = isHidden ? '▲' : '▼';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      var closeBtn = document.getElementById('apex-setup-close');
+      if (closeBtn) closeBtn.onclick = apexDismissSetup;
+
+      var backdrop = document.getElementById('apex-setup-backdrop');
+      if (backdrop) backdrop.onclick = apexDismissSetup;
+
+      var doneBtn = document.getElementById('apex-setup-btn-done');
+      if (doneBtn) doneBtn.onclick = apexDismissSetup;
+
+      var dismissBtn = document.getElementById('apex-setup-dismiss');
+      if (dismissBtn) dismissBtn.onclick = apexDismissSetup;
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') apexDismissSetup();
+      });
+    });
+
+    window.wallpaperPropertyListener = window.wallpaperPropertyListener || {};
+    var _origApply = window.wallpaperPropertyListener.applyUserProperties;
+    window.wallpaperPropertyListener.applyUserProperties = function(props) {
+      if (_origApply) _origApply.call(this, props);
+      if (props && props.setup_trigger !== undefined) {
+        var isTriggered = !!props.setup_trigger.value;
+        if (isTriggered && !_lastSetupTriggerVal) {
+          _userDismissedModal = false;
+          apexShowModal();
+        } else if (!isTriggered && _lastSetupTriggerVal) {
+          _userDismissedModal = false;
+          apexDismissSetup();
+        }
+        _lastSetupTriggerVal = isTriggered;
+      }
+    };
+  </script>
+
+  <script>
+    function wallpaperAudioListener(arr) {
+      if (window.__apexAudio) window.__apexAudio(arr);
+    }
+    if (window.wallpaperRegisterAudioListener) {
+      window.wallpaperRegisterAudioListener(wallpaperAudioListener);
+    }
+  </script>
+</body>
+</html>

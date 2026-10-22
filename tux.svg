@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Tux Linux Mascot (Clean Minimal Transparent Vector) -->
+  <defs>
+    <radialGradient id="bellyGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8ecf2"/>
+    </radialGradient>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a2e39"/>
+      <stop offset="100%" stop-color="#111318"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Feet (Orange) -->
+  <ellipse cx="34" cy="90" rx="15" ry="6" fill="#f57c00" transform="rotate(-8 34 90)"/>
+  <ellipse cx="66" cy="90" rx="15" ry="6" fill="#f57c00" transform="rotate(8 66 90)"/>
+
+  <!-- Flippers / Wings -->
+  <ellipse cx="23" cy="58" rx="7" ry="18" fill="#1e222b" transform="rotate(22 23 58)"/>
+  <ellipse cx="77" cy="58" rx="7" ry="18" fill="#1e222b" transform="rotate(-22 77 58)"/>
+
+  <!-- Body Outer (Black) -->
+  <ellipse cx="50" cy="54" rx="28" ry="34" fill="url(#bodyGrad)"/>
+
+  <!-- Belly (White patch) -->
+  <ellipse cx="50" cy="60" rx="20" ry="24" fill="url(#bellyGrad)"/>
+
+  <!-- Head (Black) -->
+  <circle cx="50" cy="28" r="21" fill="url(#bodyGrad)"/>
+
+  <!-- Eyes (White) -->
+  <ellipse cx="43" cy="24" rx="5.5" ry="7.5" fill="#ffffff"/>
+  <ellipse cx="57" cy="24" rx="5.5" ry="7.5" fill="#ffffff"/>
+
+  <!-- Pupils (Black) -->
+  <circle cx="45" cy="25" r="2.8" fill="#111318"/>
+  <circle cx="55" cy="25" r="2.8" fill="#111318"/>
+  <circle cx="46" cy="23.8" r="0.9" fill="#ffffff"/>
+  <circle cx="56" cy="23.8" r="0.9" fill="#ffffff"/>
+
+  <!-- Beak (Yellow-Orange) -->
+  <path d="M 40 32 Q 50 30 60 32 Q 50 44 40 32 Z" fill="#ffa000"/>
+  <path d="M 43 32 Q 50 34 57 32 Q 50 40 43 32 Z" fill="#f57c00"/>
+</svg>
