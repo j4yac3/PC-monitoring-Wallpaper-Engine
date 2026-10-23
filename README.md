@@ -1,65 +1,63 @@
 # APEX: Linux Ubuntu Hardware Monitor
 
-Ein minimalistisches, elegantes Linux / Ubuntu Hardware-Cockpit für **Wallpaper Engine**, optimiert für den Steam Workshop.
+A minimalist, sleek Linux / Ubuntu hardware cockpit for **Wallpaper Engine**, optimized for the Steam Workshop.
 
 ---
 
-## 🐧 Neue Features & Optimierungen
+## 🐧 New Features & Improvements
 
-### 1. Mittig schwebendes Cockpit (Desktop-Icons bleiben 100% frei!)
-- Das Monitoring-Cockpit ist jetzt **perfekt mittig im Bildschirm zentriert** (wie im echten Linux-Desktop-Design).
-- Es klebt nicht mehr an den Monitor-Außenrändern: Deine Desktop-Icons links und rechts bleiben vollständig sichtbar und unbedeckt!
-- In den Wallpaper Engine Einstellungen kannst du zwischen **`Mittig schwebend (Empfohlen)`**, **`Kompakt zentriert`** und **`Vollbild`** wählen.
+### 1. Centered Floating Cockpit (Desktop Icons Remain 100% Unobstructed!)
+- The monitoring cockpit is now **perfectly centered on screen** (inspired by genuine Linux desktop design).
+- No more sticking to display edges: your desktop icons on the left and right stay fully visible and accessible!
+- Select between **`Centered Floating (Recommended)`**, **`Compact Centered`**, and **`Fullscreen`** in the Wallpaper Engine properties.
 
-### 2. Reiner Audio-Ausschlag (Ohne störende Zacken)
-- Das unruhige Frametime-Zackendiagramm wurde entfernt. Die untere rechte Box gehört jetzt voll und ganz dem **reinen Audio-Equalizer**:
-- 32 Frequenzkanäle von Bass (30Hz) bis Treble (16kHz), Peak-Hold-Nadeln und Live-dB-Anzeige.
-- Schlägt nur aus, wenn tatsächlich Sound abgespielt wird oder gesprochen wird. Bei Stille ruht es völlig flach.
+### 2. Clean Audio Spectrum (No Distracting Spikes)
+- The erratic frametime spike graph has been removed. The lower-right box is now dedicated entirely to the **pure audio equalizer**:
+- 32 frequency channels ranging from bass (30 Hz) to treble (16 kHz), peak-hold needles, and live dB readouts.
+- Only reacts when sound or voice is actively playing. Remains completely flat during silence.
 
-### 3. 100% perfekte Formatierung (Keine Textüberlappungen mehr!)
-- Die untere Box (`// sysinfo` und `// dmesg`) ist jetzt mit einer sauberen vertikalen Trennlinie in zwei feste Hälften unterteilt.
-- Alle Strings werden bei Bedarf intelligent mit `…` gekürzt, sodass selbst auf 1440×900, 1080p oder Ultrawide **niemals Texte übereinanderliegen**.
-- Auch in der Fußzeile ist der linke Text nun dynamisch begrenzt, damit er die rechte `144Hz`-Anzeige nie berührt.
+### 3. 100% Crisp Formatting (No Overlapping Text)
+- The bottom console (`// sysinfo` and `// dmesg`) is cleanly split into two balanced halves with a vertical divider.
+- Long strings are dynamically truncated with an ellipsis (`…`) so text **never overlaps**, even on 1440×900, 1080p, or ultrawide aspect ratios.
+- The footer text is also dynamically bounded to ensure it never collides with the right-hand `144Hz` display.
 
-### 2. Einfarbiger Monochrom-Modus („Alles in einer Farbe“)
-- In den Wallpaper Engine Eigenschaften gibt es jetzt die Checkbox:  
-  **`Einfarbiger Monochrom-Modus (Alles in einer Farbe)`**
-- Ist dieser aktiviert, erstrahlt das **gesamte Wallpaper einheitlich in deiner Wunschfarbe** (z. B. komplett im klassischen Ubuntu-Orange, Cyber-Cyan, Neon-Rot, Matrix-Grün oder Stealth-Weiß).
-- Alle Rahmen, Graphen, Lüfter, Texte und das 3D-PC-Hologramm passen sich harmonisch an!
+### 4. Single-Color Monochrome Mode ("All in One Accent")
+- A toggle is available in the Wallpaper Engine properties:  
+  **`Single-Color Monochrome Mode (All in One Accent)`**
+- When enabled, the **entire wallpaper shines uniformly in your accent color of choice** (e.g. classic Ubuntu Orange, Cyber Cyan, Neon Red, Matrix Green, or Stealth White).
+- All borders, graphs, fans, typography, and the 3D PC hologram adapt harmoniously!
 
-### 3. Granulare Farbkontrolle (Jedes Modell einzeln anpassen)
-- Wenn der Monochrom-Modus ausgeschaltet ist, kannst du jedes Element separat über eigene Farbfelder anpassen:
-  - **CPU & Header Farbe** (`schemecolor`)
-  - **GPU & Frametime Farbe** (`hud_secondary_color`)
-  - **RAM & Speicher Farbe** (`hud_ram_color`)
-  - **3D-PC Hologramm Farbe** (`hud_pc_color`)
-  - **Hintergrundfarbe** (`hud_bg_color`)
+### 5. Granular Color Control (Customize Each Component)
+- When monochrome mode is disabled, each element can be individually styled:
+  - **CPU & Header Color** (`schemecolor`)
+  - **GPU & Accent Color** (`hud_secondary_color`)
+  - **RAM & Memory Color** (`hud_ram_color`)
+  - **3D PC Hologram Color** (`hud_pc_color`)
+  - **Background Color** (`hud_bg_color`)
 
-### 4. Vektor-Tux direkt im Code implementiert (Keine störende Schrift)
-- Die Schrift `APEX // UBUNTU LINUX MONITOR` im Header wurde entfernt – oben links sitzt jetzt **ausschließlich der Tux-Pinguin**.
-- Das Tux-Logo ist nun **als reiner Vektor direkt in JavaScript gerendert** (`drawTux`): 0 externe Bilddateien, 0ms Ladezeit, kein Flackern beim Wallpaper-Start und 100% autark für den Steam Workshop!
+### 6. Code-Rendered Vector Tux (Zero Asset Overhead)
+- The `APEX // UBUNTU LINUX MONITOR` text header has been removed — the top-left features **exclusively the Tux penguin**.
+- The Tux logo is **rendered natively in JavaScript as a pure vector** (`drawTux`): 0 external image requests, 0 ms load time, zero start-up flickering, and 100% self-contained for the Steam Workshop!
 
 ---
 
-## 🖥 Hardware-Erkennung
-- **CPU:** `AMD Ryzen 9 9950X3D` 
-- **GPU:** `NVIDIA Geforce RTX 5090` (32 GB VRAM)
+## 🖥 Hardware Detection Specs
+- **CPU:** `AMD Ryzen 9 9950X3D`
+- **GPU:** `NVIDIA GeForce RTX 5090` (32 GB VRAM)
 - **Mainboard:** `ASUS ROG Crosshair X870E Extreme`
 - **RAM:** `128 GB DDR5`
-- **OS:** `Windows 11 Pro, 64 Bit`
+- **OS:** `Windows 11 Pro 64-Bit`
 
 ---
 
-## 🚀 Veröffentlichung auf Wallpaper Engine
-Das Wallpaper ist jetzt 100% veröffentlichungsreif:
-1. Öffne Wallpaper Engine.
-2. Wähle das Projekt über den Wallpaper-Editor.
-3. Klicke auf **„Auf Steam Workshop veröffentlichen“**.
+## 🚀 Publishing to Wallpaper Engine
+The wallpaper is 100% ready for publishing:
+1. Open Wallpaper Engine.
+2. Select this project in the Wallpaper Editor.
+3. Click on **"Publish to Steam Workshop"**.
 
+---
 
-## Hardware-Erkennung reparieren
-Die Hardware-Erkennung liegt als PowerShell-Skript `detect-hardware.ps1` vor.
-Doppelklicke auf `detect-hardware.bat` (oder `update-hardware.bat`), um
-`hardware.js` in diesem Ordner neu zu erzeugen. Das Fenster bleibt offen,
-damit Fehlermeldungen sichtbar bleiben. Die Live-Telemetrie wird über
-`start-telemetry.vbs` gestartet und verwendet `live-telemetry.ps1`.
+## Troubleshooting Hardware Detection
+Hardware detection is powered by the PowerShell script `detect-hardware.ps1`.
+Double-click `detect-hardware.bat` (or `update-hardware.bat`) to regenerate `hardware.js` in this folder. The console window remains open so any error messages remain visible. Real-time telemetry is launched via `start-telemetry.vbs` and runs `live-telemetry.ps1` in the background.
