@@ -15,3 +15,7 @@ $RECYCLE.BIN/
 .idea/
 *.suo
 *.user
+
+# Local runtime telemetry
+# To prevent committing local live hardware or live telemetry, run:
+# git update-index --assume-unchanged hardware.js telemetry.js telemetry.json

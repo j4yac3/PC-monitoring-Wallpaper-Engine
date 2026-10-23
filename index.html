@@ -1,90 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>APEX: Hardware Monitor</title>
+  <title>APEX: Quantum Hardware Monitor</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <canvas id="hud-canvas"></canvas>
   <div id="scanlines" class="scanlines-layer"></div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       SETUP & HARDWARE INFO MODAL
+       ═══════════════════════════════════════════════════════════ -->
   <div id="apex-setup-modal" style="display:none">
     <div id="apex-setup-backdrop"></div>
     <div id="apex-setup-box">
 
+      <!-- Header -->
       <div id="apex-setup-header">
         <span id="apex-setup-icon">⚡</span>
         <div>
           <div id="apex-setup-title">APEX HARDWARE MONITOR</div>
-          <div id="apex-setup-subtitle">SYSTEM PROFILER &amp; TELEMETRY</div>
+          <div id="apex-setup-subtitle">SYSTEM-ERKENNUNG &amp; SETUP</div>
         </div>
-        <button id="apex-setup-close" title="Close (ESC)">✕</button>
+        <button id="apex-setup-close" title="Schließen (ESC)">✕</button>
       </div>
 
       <div id="apex-setup-divider"></div>
 
+      <!-- Live Hardware Status Box -->
       <div class="apex-hw-card">
         <div class="apex-hw-status">
           <span class="apex-status-dot"></span>
-          <span>Hardware Detection Active</span>
+          <span>Hardware-Erkennung aktiv</span>
         </div>
         <div class="apex-hw-grid">
           <div class="apex-hw-item">
             <span class="apex-hw-label">GPU:</span>
-            <span class="apex-hw-value" id="modal-gpu-val">Detecting…</span>
+            <span class="apex-hw-value" id="modal-gpu-val">Erkenne…</span>
           </div>
           <div class="apex-hw-item">
             <span class="apex-hw-label">CPU:</span>
-            <span class="apex-hw-value" id="modal-cpu-val">Detecting…</span>
+            <span class="apex-hw-value" id="modal-cpu-val">Erkenne…</span>
           </div>
           <div class="apex-hw-item">
             <span class="apex-hw-label">RAM:</span>
-            <span class="apex-hw-value" id="modal-ram-val">Detecting…</span>
+            <span class="apex-hw-value" id="modal-ram-val">Erkenne…</span>
           </div>
           <div class="apex-hw-item">
             <span class="apex-hw-label">SYSTEM:</span>
-            <span class="apex-hw-value" id="modal-os-val">Detecting…</span>
+            <span class="apex-hw-value" id="modal-os-val">Erkenne…</span>
           </div>
         </div>
       </div>
 
+      <!-- Haupt-Button: Sofort schließen und Wallpaper nutzen -->
       <button id="apex-setup-btn-done">
         <span>✓</span>
-        <span>Hardware Verified — Close &amp; Continue</span>
+        <span>Alles erkannt — Schließen &amp; nutzen</span>
       </button>
 
       <div id="apex-setup-divider2"></div>
 
+      <!-- Info für Tiefenscan / Live Taskmanager -->
       <div id="apex-setup-advanced-toggle" onclick="apexToggleAdvanced()">
-        <span>🔧 Extended Windows Profiler &amp; Live Telemetry (Optional)</span>
+        <span>🔧 Exakte Windows-Werte &amp; Live-Taskmanager (Optional)</span>
         <span id="apex-adv-arrow">▼</span>
       </div>
 
       <div id="apex-setup-advanced-content" style="display:none">
         <div id="apex-setup-info">
-          Wallpaper Engine sandboxes web wallpapers for security. To run deep Windows hardware profiling or real-time Task Manager telemetry:
+          Wallpaper Engine blockiert aus Windows-Sicherheitsgründen das direkte Starten von Programmen per Mausklick im Browser. So aktivierst du den Tiefenscan:
         </div>
         <div id="apex-setup-steps">
           <div class="apex-step">
             <span class="apex-step-num">1</span>
-            <span>Right-click this wallpaper in Wallpaper Engine → <strong>"Open in Explorer"</strong></span>
+            <span>Rechtsklick auf dieses Wallpaper in Wallpaper Engine → <strong>„Im Explorer anzeigen“</strong></span>
           </div>
           <div class="apex-step">
             <span class="apex-step-num">2</span>
-            <span>Run <strong>update-hardware.bat</strong> (Reads exact motherboard model &amp; VRAM)</span>
+            <span>Doppelklick auf <strong>update-hardware.bat</strong> (Liest Mainboard &amp; exakten VRAM aus)</span>
           </div>
           <div class="apex-step">
             <span class="apex-step-num">3</span>
-            <span>For 1:1 real-time Task Manager monitoring: Run <strong>start-live-telemetry.bat</strong></span>
+            <span>Für Live CPU-Auslastung: Doppelklick auf <strong>start-live-telemetry.bat</strong></span>
           </div>
         </div>
       </div>
 
+      <!-- Footer -->
       <div id="apex-setup-footer">
-        <span id="apex-setup-auto-badge">● Ready · Plug &amp; Play</span>
-        <button id="apex-setup-dismiss">Close</button>
+        <span id="apex-setup-auto-badge">● 100% Plug &amp; Play bereit</span>
+        <button id="apex-setup-dismiss">Schließen</button>
       </div>
 
     </div>
@@ -94,6 +102,7 @@
   <script src="telemetry.js"></script>
   <script src="main.js"></script>
 
+  <!-- ═══ SETUP MODAL LOGIK ═══ -->
   <script>
     var _lastSetupTriggerVal = false;
     var _userDismissedModal = false;
@@ -107,10 +116,10 @@
         var osEl  = document.getElementById('modal-os-val');
 
         if (gpuEl) {
-          gpuEl.textContent = (h.gpuName || 'GPU detected') + (h.gpuVramGB ? ' · ' + h.gpuVramGB + ' GB VRAM' : '');
+          gpuEl.textContent = (h.gpuName || 'GPU erkannt') + (h.gpuVramGB ? ' · ' + h.gpuVramGB + ' GB VRAM' : '');
         }
         if (cpuEl) {
-          cpuEl.textContent = (h.cpuName || 'CPU detected') + (h.cpuThreads ? ' (' + h.cpuThreads + 'T)' : '');
+          cpuEl.textContent = (h.cpuName || 'CPU erkannt') + (h.cpuThreads ? ' (' + h.cpuThreads + 'T)' : '');
         }
         if (ramEl) {
           ramEl.textContent = (h.ramGB || 8) + ' GB RAM';
@@ -146,6 +155,7 @@
       }
     }
 
+    // Event-Listener direkt nach DOM-Load registrieren
     window.addEventListener('DOMContentLoaded', function() {
       var closeBtn = document.getElementById('apex-setup-close');
       if (closeBtn) closeBtn.onclick = apexDismissSetup;
@@ -164,6 +174,7 @@
       });
     });
 
+    // Wallpaper Engine Property Listener (Edge-Triggered!)
     window.wallpaperPropertyListener = window.wallpaperPropertyListener || {};
     var _origApply = window.wallpaperPropertyListener.applyUserProperties;
     window.wallpaperPropertyListener.applyUserProperties = function(props) {
@@ -182,5 +193,14 @@
     };
   </script>
 
+  <!-- Nativer Wallpaper Engine Audio-Listener Hook -->
+  <script>
+    function wallpaperAudioListener(arr) {
+      if (window.__apexAudio) window.__apexAudio(arr);
+    }
+    if (window.wallpaperRegisterAudioListener) {
+      window.wallpaperRegisterAudioListener(wallpaperAudioListener);
+    }
+  </script>
 </body>
 </html>

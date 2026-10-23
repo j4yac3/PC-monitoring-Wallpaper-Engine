@@ -1,12 +1,23 @@
+/**
+ * ┌────────────────────────────────────────────────────────────────────────┐
+ * │  APEX LINUX MONITOR · Wallpaper Engine Web Wallpaper v9.5              │
+ * │  Style: Stealth Monochromatic Black & White · Minimalist Cockpit       │
+ * │  Performance: Ultra-Low CPU Engine (~1-2% CPU, Potato PC / Win7 ready) │
+ * │  Features: Hardware Telemetry, 3D PC Wireframe, Tux Icon, Audio        │
+ * └────────────────────────────────────────────────────────────────────────┘
+ */
 (function () {
   'use strict';
 
+  // ── §1 HARDWARE DETECTION ───────────────────────────────────────────────
+
+  // Liest gespeicherte JS-Auto-Erkennung aus localStorage (Fallback wenn kein hardware.js)
   function loadCachedHW() {
     try {
       const raw = localStorage.getItem('apex_hw_cache');
       if (!raw) return null;
       const d = JSON.parse(raw);
-      
+      // Cache maximal 30 Tage gültig
       if (Date.now() - (d._ts || 0) > 30 * 86400000) { localStorage.removeItem('apex_hw_cache'); return null; }
       return d;
     } catch (_) { return null; }
@@ -16,6 +27,7 @@
     try { localStorage.setItem('apex_hw_cache', JSON.stringify({ ...hw, _ts: Date.now() })); } catch (_) {}
   }
 
+  // Erkennt GPU-Name + VRAM-Schätzung via WebGL
   function detectGPUviaWebGL() {
     const result = { name: null, vramGB: null };
     try {
@@ -26,23 +38,25 @@
       const ex = gl.getExtension('WEBGL_debug_renderer_info');
       if (ex) {
         let r = gl.getParameter(ex.UNMASKED_RENDERER_WEBGL) || '';
-        
+        // ANGLE-Wrapper entfernen (Windows-typisch)
         const m = r.match(/ANGLE\s*\([^,]+,\s*([^,]+?)(?:\s*Direct3D|\s*D3D|\s*\(0x|,|\))/i);
         if (m?.[1]) r = m[1];
         r = r.replace(/^(NVIDIA|AMD|Intel)\s+\1\s*/i, '$1 ').trim().toUpperCase();
         if (r.length > 3) result.name = r;
       }
 
+      // VRAM-Schätzung: MAX_TEXTURE_SIZE als Heuristik
       const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 0;
-      
-      if      (maxTex >= 32768) result.vramGB = 16;  
-      else if (maxTex >= 16384) result.vramGB = 8;   
-      else if (maxTex >= 8192)  result.vramGB = 4;   
+      // Heuristik: Texturgröße → VRAM-Bereich
+      if      (maxTex >= 32768) result.vramGB = 16;  // RTX 3080+, RX 6800+
+      else if (maxTex >= 16384) result.vramGB = 8;   // RTX 3070, RX 6700 XT
+      else if (maxTex >= 8192)  result.vramGB = 4;   // GTX 1660, RX 580
       else                       result.vramGB = 2;
 
+      // VRAM aus WebGL2 Memory Info (wenn verfügbar, z.B. Chrome mit Flag)
       const mem = gl.getExtension('WEBGL_draw_buffers');
       const memInfo = gl.getExtension('MOZ_WEBGL_lose_context');
-      
+      // Versuche GL_GPU_MEMORY_INFO (NVIDIA-spezifisch)
       try {
         const NVIDIA_GPU_MEM = 0x9049;
         const totalMem = gl.getParameter(NVIDIA_GPU_MEM);
@@ -52,6 +66,7 @@
     return result;
   }
 
+  // OS-Erkennung via User-Agent
   function detectOS() {
     const ua = navigator.userAgent;
     if (/Windows NT 11\.0|Windows NT 10\.0.*Win64/i.test(ua)) return 'Windows 11 64-Bit';
@@ -62,8 +77,9 @@
     return 'Windows';
   }
 
+  // CPU-Vendor-Schätzung (grob, aber besser als nichts)
   function guessCPUName(threads) {
-    
+    // Wallpaper Engine läuft nur auf Windows → meistens Intel oder AMD
     const cached = loadCachedHW();
     if (cached?.cpuName && cached.cpuName !== 'Your CPU') return cached.cpuName;
     if (threads >= 32) return `High-End CPU (${threads}T)`;
@@ -75,18 +91,21 @@
 
   function detectHW() {
     const C = window.CUSTOM_HARDWARE || {};
-    const hasCustomHW = !!(C.cpuName);  
+    const hasCustomHW = !!(C.cpuName);  // hardware.js wurde ausgeführt
 
+    // Schritt 1: Auto-Erkennung via WebGL (funktioniert auf jedem PC ohne Setup)
     const glInfo = detectGPUviaWebGL();
     const threads = navigator.hardwareConcurrency || 4;
     const cores   = Math.max(1, Math.floor(threads / 2));
 
+    // Schritt 2: RAM — navigator.deviceMemory gibt Näherungswert (1,2,4,8,16,32 GB)
     const jsRam = navigator.deviceMemory || 4;
 
+    // Schritt 3: Cache laden (wenn kein hardware.js vorhanden)
     const cache = hasCustomHW ? null : loadCachedHW();
 
     const hw = {
-      
+      // hardware.js hat Vorrang → sonst Cache → sonst JS-Auto-Erkennung
       cpuName:    C.cpuName    || cache?.cpuName    || guessCPUName(threads),
       cpuCores:   C.cpuCores   || cache?.cpuCores   || cores,
       cpuThreads: C.cpuThreads || cache?.cpuThreads || threads,
@@ -104,9 +123,10 @@
       uptime:     0,
       netAdapterName: C.netAdapterName || cache?.netAdapterName || '—',
       netSpeedMbps:   C.netSpeedMbps   || cache?.netSpeedMbps   || 0,
-      _isAutoDetected: !hasCustomHW,  
+      _isAutoDetected: !hasCustomHW,  // Flag: kein hardware.js vorhanden
     };
 
+    // Cache aktualisieren wenn kein hardware.js vorhanden
     if (!hasCustomHW) saveCachedHW(hw);
 
     navigator.storage?.estimate?.().then(e => {
@@ -119,57 +139,67 @@
   const HW = detectHW();
   window.HW = HW;
 
+  // ── §2 LINUX TUX LOGO ────────────────────────────────────────────────────
   function drawTux(x, y, size) {
     ctx.save();
     const k = size / 100;
     const cx = x + size * 0.5;
     const cy = y + size * 0.5;
 
+    // Füße
     ctx.fillStyle = S.monochrome ? '#d1d5db' : '#f57c00';
     ctx.beginPath();
     ctx.ellipse(cx - 16 * k, cy + 40 * k, 15 * k, 6 * k, -0.14, 0, Math.PI * 2);
     ctx.ellipse(cx + 16 * k, cy + 40 * k, 15 * k, 6 * k, 0.14, 0, Math.PI * 2);
     ctx.fill();
 
+    // Flügel
     ctx.fillStyle = '#1e222b';
     ctx.beginPath();
     ctx.ellipse(cx - 26 * k, cy + 8 * k, 7 * k, 18 * k, 0.38, 0, Math.PI * 2);
     ctx.ellipse(cx + 26 * k, cy + 8 * k, 7 * k, 18 * k, -0.38, 0, Math.PI * 2);
     ctx.fill();
 
+    // Körper außen
     ctx.fillStyle = '#14171d';
     ctx.beginPath();
     ctx.ellipse(cx, cy + 4 * k, 28 * k, 34 * k, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Bauch
     ctx.fillStyle = '#f0f3f8';
     ctx.beginPath();
     ctx.ellipse(cx, cy + 10 * k, 20 * k, 24 * k, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Kopf
     ctx.fillStyle = '#14171d';
     ctx.beginPath();
     ctx.arc(cx, cy - 22 * k, 21 * k, 0, Math.PI * 2);
     ctx.fill();
 
+    // Augen
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.ellipse(cx - 7 * k, cy - 26 * k, 5.5 * k, 7.5 * k, 0, 0, Math.PI * 2);
     ctx.ellipse(cx + 7 * k, cy - 26 * k, 5.5 * k, 7.5 * k, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Pupillen
     ctx.fillStyle = '#0a0c10';
     ctx.beginPath();
     ctx.arc(cx - 5 * k, cy - 25 * k, 2.8 * k, 0, Math.PI * 2);
     ctx.arc(cx + 5 * k, cy - 25 * k, 2.8 * k, 0, Math.PI * 2);
     ctx.fill();
 
+    // Lichtpunkte
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(cx - 4 * k, cy - 26.2 * k, 1 * k, 0, Math.PI * 2);
     ctx.arc(cx + 6 * k, cy - 26.2 * k, 1 * k, 0, Math.PI * 2);
     ctx.fill();
 
+    // Schnabel
     ctx.fillStyle = S.monochrome ? '#ffffff' : '#ffa000';
     ctx.beginPath();
     ctx.moveTo(cx - 10 * k, cy - 18 * k);
@@ -189,12 +219,13 @@
     ctx.restore();
   }
 
+  // ── §3 FARB-SYSTEM & MONOCHROM-MODUS ─────────────────────────────────────
   const userColors = {
-    primary:   '#ffffff',   
-    secondary: '#d1d5db',   
-    ram:       '#f3f4f6',   
-    pc:        '#ffffff',   
-    bg:        '#000000'    
+    primary:   '#ffffff',   // Reines Weiß (CPU & Header)
+    secondary: '#d1d5db',   // Silber (GPU & Kurven)
+    ram:       '#f3f4f6',   // Helles Platin-Weiß (RAM)
+    pc:        '#ffffff',   // Weißes 3D Rig Hologramm
+    bg:        '#000000'    // Tiefschwarz
   };
 
   const COL = {
@@ -259,12 +290,13 @@
     }
   }
 
+  // ── §4 STATE & TELEMETRIE ────────────────────────────────────────────────
   const S = {
     layoutMode:   'centered',
-    fpsLimit:     30,         
+    fpsLimit:     30,         // Standard 30 FPS für minimalste CPU-Last (~1%)
     pollingMs:    1000,
     tempUnit:     'celsius',
-    monochrome:   true,       
+    monochrome:   true,       // Standardmäßig Black & White Stealth
     showStars:    true,
     paused:       false,
     pcRotY:       0,
@@ -281,7 +313,7 @@
     cpuLoad:      12,
     cpuTarget:    12,
     cpuTempC:     41,
-    cpuFreqMHz:   HW.cpuBaseMHz || 3000,  
+    cpuFreqMHz:   HW.cpuBaseMHz || 3000,  // BUG-L fix: dynamischer Fallback
     cpuFanRPM:    940,
     cpuVoltage:   1.14,
     cpuBenchMs:   0.35,
@@ -300,13 +332,13 @@
     gpuHist:      new Array(60).fill(18),
     gpuFanA:      0,
 
-    ramGBUsed:    0,             
-    ramGBTotal:   HW.ramGB || 8, 
+    ramGBUsed:    0,             // BUG-C/I fix: dynamischer Fallback (0)
+    ramGBTotal:   HW.ramGB || 8, // BUG-C fix: neutraler Fallback 8 GB statt 14
     ramPct:       68,
     ramHist:      new Array(60).fill(68),
     liveConnected:false,
-    liveOkCount:  0,   
-    liveFailCount:0,   
+    liveOkCount:  0,   // BUG-A fix: State-Machine Hysterese-Zähler
+    liveFailCount:0,   // BUG-A fix: State-Machine Hysterese-Zähler
     netDownMbps:  0,
     netUpMbps:    0,
 
@@ -322,10 +354,12 @@
     ftTimer:      performance.now(),
   };
 
+  // ── §5 CANVAS SETUP (Natives 1:1 Pixel Mapping für maximale Performance) ─
   const canvas = document.getElementById('hud-canvas');
   const ctx    = canvas.getContext('2d', { alpha: false });
   let W = 0, H = 0;
 
+  // Polyfill für roundRect
   if (!ctx.roundRect) {
     ctx.roundRect = function (x, y, w, h, r) {
       const radius = typeof r === 'number' ? r : 5;
@@ -347,7 +381,7 @@
   function resize() {
     W = window.innerWidth;
     H = window.innerHeight;
-    
+    // DPR = 1: Spart über 60% GPU/CPU Fillrate gegenüber skaliertem Canvas
     canvas.width  = W;
     canvas.height = H;
     canvas.style.width  = W + 'px';
@@ -357,6 +391,7 @@
   window.addEventListener('resize', resize, { passive: true });
   resize();
 
+  // Gedrosselter Mousemove-Handler gegen Gaming-Mäuse mit 1000Hz Polling
   let mouseThrottle = false;
   window.addEventListener('mousemove', e => {
     if (mouseThrottle) return;
@@ -366,6 +401,7 @@
     requestAnimationFrame(() => { mouseThrottle = false; });
   }, { passive: true });
 
+  // ── §6 REALE CPU-LAST & SENSOR-MESSUNG (0% CPU Overhead) ─────────────────
   let lastBenchTime = performance.now();
   function benchmark(now) {
     const dt = now - lastBenchTime;
@@ -380,18 +416,19 @@
     if (now - lastTelePoll < 980) return;
     lastTelePoll = now;
 
+    // 1. Direkt aus window.LIVE_TELEMETRY lesen (gesetzt durch den letzten XHR)
     const lt = window.LIVE_TELEMETRY;
     if (lt && typeof lt.cpu === 'number') {
       const age = Date.now() - (lt.timestamp || 0);
       if (age < 3500) {
-        
+        // BUG-A fix: Erst nach 2 aufeinanderfolgenden OK-Werten auf true wechseln
         T.liveOkCount   = Math.min(T.liveOkCount + 1, 5);
         T.liveFailCount = 0;
 
         const wasConnected = T.liveConnected;
         if (!wasConnected && T.liveOkCount >= 2) {
           T.liveConnected = true;
-          
+          // BUG-B fix: Beim ersten Connect sofort auf echten Wert snappen (kein Smoothing)
           T.cpuLoad   = Math.max(1, Math.min(100, lt.cpu));
           T.cpuTarget = T.cpuLoad;
         } else if (wasConnected) {
@@ -401,7 +438,7 @@
         if (lt.ramUsedGB)  T.ramGBUsed = lt.ramUsedGB;
         if (lt.ramTotalGB) T.ramGBTotal = lt.ramTotalGB;
         if (lt.ramPct)     T.ramPct     = lt.ramPct;
-        
+        // BUG-J fix: Netzwerkwerte nur übernehmen wenn live
         if (typeof lt.netDownMbps === 'number') T.netDownMbps = Math.max(0, lt.netDownMbps);
         if (typeof lt.netUpMbps   === 'number') T.netUpMbps   = Math.max(0, lt.netUpMbps);
         if (lt.cores && Array.isArray(lt.cores)) {
@@ -410,31 +447,32 @@
           }
         }
       } else {
-        
+        // Daten zu alt → Fail-Counter erhöhen
         T.liveOkCount = 0;
         T.liveFailCount = Math.min(T.liveFailCount + 1, 10);
-        
+        // BUG-A fix: Erst nach 3 aufeinanderfolgenden Fehlern auf false wechseln (Hysterese)
         if (T.liveConnected && T.liveFailCount >= 3) {
           T.liveConnected = false;
-          
+          // BUG-E fix: cpuTarget sofort auf benchmark-Wert zurücksetzen
           T.cpuTarget = benchmark(now);
           T.netDownMbps = 0;
           T.netUpMbps   = 0;
         }
       }
     } else {
-      
+      // Kein LIVE_TELEMETRY Objekt vorhanden
       T.liveOkCount = 0;
       T.liveFailCount = Math.min(T.liveFailCount + 1, 10);
       if (T.liveConnected && T.liveFailCount >= 3) {
         T.liveConnected = false;
-        
+        // BUG-E fix: cpuTarget sofort auf benchmark-Wert zurücksetzen
         T.cpuTarget = benchmark(now);
         T.netDownMbps = 0;
         T.netUpMbps   = 0;
       }
     }
 
+    // 2. XMLHttpRequest für direkten lokalen Dateizugriff (Null DOM-Overhead)
     try {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', 'telemetry.json?_t=' + Date.now(), true);
@@ -460,7 +498,8 @@
     if (!T.liveConnected) {
       T.cpuTarget = benchmark(now);
     }
-
+    // BUG-B fix: liveConnected → cpuLoad bereits auf cpuTarget gesetzt beim ersten Connect
+    // Danach normales Smoothing. Im Demo-Modus etwas langsameres Smoothing.
     T.cpuLoad  += (T.cpuTarget - T.cpuLoad) * (T.liveConnected ? 0.65 : 0.55);
     T.cpuFreqMHz = Math.round(HW.cpuBaseMHz + (T.cpuLoad / 100) * (HW.cpuBoostMHz - HW.cpuBaseMHz));
     T.cpuVoltage = +(1.10 + (T.cpuLoad / 100) * 0.17).toFixed(2);
@@ -493,6 +532,7 @@
     T.ramHist.shift(); T.ramHist.push(T.ramPct);
   }
 
+  // ── §7 AUDIO LISTENER ────────────────────────────────────────────────────
   function wallpaperAudioListener(arr) {
     if (!arr || arr.length < 32) return;
 
@@ -552,10 +592,11 @@
   }, 200);
   setTimeout(() => clearInterval(audioInterval), 10000);
 
+  // ── §8 FORMATIER- & TEXT-HELFER ──────────────────────────────────────────
   const fmtTemp = c => S.tempUnit === 'fahrenheit'
     ? `${Math.round(c * 9 / 5 + 32)}°F` : `${c.toFixed(1)}°C`;
   const fmtClock = () => new Date().toTimeString().slice(0, 8);
-  const fmtDate  = () => new Date().toLocaleDateString('en-US',
+  const fmtDate  = () => new Date().toLocaleDateString('de-DE',
     { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }).toUpperCase();
   function fmtUptime() {
     const s = (performance.now() - S.t0) / 1000;
@@ -577,6 +618,7 @@
     ctx.fillText(t + '…', x, y);
   }
 
+  // ── §9 ZEICHEN-PRIMITIVEN ────────────────────────────────────────────────
   function panel(x, y, w, h, title, badge = '', col = COL.primary) {
     ctx.save();
     ctx.fillStyle = COL.panel;
@@ -734,6 +776,7 @@
     ctx.restore();
   }
 
+  // ── §10 RUHIGES KOSMISCHES STERNENFELD (50 Sterne für minimale CPU-Last) ──
   const STARS = Array.from({ length: 50 }, () => ({
     x: (Math.random() - 0.5) * 2400,
     y: (Math.random() - 0.5) * 1400,
@@ -758,6 +801,7 @@
     ctx.restore();
   }
 
+  // ── §11 3D GAMING-PC HOLOGRAMM (Vorab-Matrixberechnung für 0% Trig-Overhead) ─
   function makeBox(x0, y0, z0, x1, y1, z1) {
     return [
       [[x0, y0, z0], [x1, y0, z0]], [[x1, y0, z0], [x1, y1, z0]], [[x1, y1, z0], [x0, y1, z0]], [[x0, y1, z0], [x0, y0, z0]],
@@ -830,6 +874,7 @@
     ctx.strokeStyle = COL.border; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
 
+    // 2 Strokes für alle 60 Kompass-Ticks
     ctx.strokeStyle = COL.primary; ctx.lineWidth = 1.3;
     ctx.beginPath();
     for (let i = 0; i < 60; i += 5) {
@@ -855,6 +900,7 @@
       ctx.fillText(lbl, cx + Math.cos(a) * (R + 11), cy + Math.sin(a) * (R + 11));
     }
 
+    // Drehringe (voll hardwarebeschleunigt ohne CPU-LineDash)
     ctx.save();
     ctx.translate(cx + mx * 0.5, cy + my * 0.5); ctx.rotate(nowSec * 0.17);
     ctx.strokeStyle = S.monochrome ? COL.primary : COL.secondary;
@@ -871,10 +917,12 @@
 
     ctx.globalAlpha = 1;
 
+    // CPU Bogen
     const ca = (T.cpuLoad / 100) * Math.PI * 0.86;
     ctx.beginPath(); ctx.arc(cx, cy, R - 14, Math.PI * 0.55, Math.PI * 0.55 + ca);
     ctx.strokeStyle = COL.primary; ctx.lineWidth = 5; ctx.stroke();
 
+    // GPU Bogen
     const ga = (T.gpuLoad / 100) * Math.PI * 0.86;
     ctx.beginPath(); ctx.arc(cx, cy, R - 14, Math.PI * 0.45, Math.PI * 0.45 - ga, true);
     ctx.strokeStyle = S.monochrome ? COL.primary : COL.secondary;
@@ -883,6 +931,7 @@
     ctx.restore();
   }
 
+  // ── §12 BOTTOM BOX: SYSINFO & DMESG ──────────────────────────────────────
   function drawBottomBox(centX, nfY, centW, nfH) {
     ctx.save();
     ctx.fillStyle = COL.panel;
@@ -971,6 +1020,7 @@
     ctx.restore();
   }
 
+  // ── §13 EVENT LOG SETUP ──────────────────────────────────────────────────
   const ts  = () => new Date().toTimeString().slice(0, 8);
   const LOG = [
     `[${ts()}]  kernel: Linux 6.5.0-35-generic`,
@@ -990,12 +1040,14 @@
     else addLog(`amdgpu: GPU ${Math.round(T.gpuLoad)}% · ${fmtTemp(T.gpuTempC)}`);
   }
 
+  // ── §14 MAIN RENDER LOOP (Mit strengem FPS-Limiter für minimalste Last) ──
   let lastDrawTime = performance.now();
 
   function render(now) {
     if (S.paused) return;
     requestAnimationFrame(render);
 
+    // Strenger Frame-Limiter: Überspringt überflüssige Frames bei 144Hz Monitoren
     const elapsed = now - lastDrawTime;
     if (elapsed < frameInterval - 1.5) return;
     lastDrawTime = now - (elapsed % frameInterval);
@@ -1003,6 +1055,7 @@
     const dt = Math.min(0.1, elapsed / 1000);
     const nowSec = now * 0.001;
 
+    // FPS Tracking
     T.ftRing.shift(); T.ftRing.push(elapsed);
     T.ftCount++;
     if (now - T.ftTimer >= 1000) {
@@ -1027,11 +1080,13 @@
       if (T.eq[i] < 0.005) T.eq[i] = 0;
     }
 
+    // ── CLEAR ────────────────────────────────────────────────────────────
     ctx.fillStyle = COL.bg;
     ctx.fillRect(0, 0, W, H);
 
     starfield(dt);
 
+    // Gitter (65px Raster in genau 1 Stroke)
     ctx.save();
     ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1040,6 +1095,7 @@
     ctx.stroke();
     ctx.restore();
 
+    // ── LAYOUT-GEOMETRIE ──────────────────────────────────────────────────
     const availH = Math.max(400, H - 48);
     const isUW   = W / H > 2.0;
 
@@ -1071,6 +1127,7 @@
     const centX = lX + cW + gap;
     const centW = rX - centX - gap;
 
+    // ── HEADER ─────────────────────────────────────────────────────────────
     ctx.save();
     drawTux(bX + 8, bY + Math.round((HH - 26) * 0.5), 26);
 
@@ -1088,6 +1145,7 @@
     ctx.fillText(`● ONLINE // ${T.fps} FPS`, bX + bW, bY + HH * 0.5);
     ctx.restore();
 
+    // ── LINKER FLÜGEL: CPU & MEMORY ───────────────────────────────────────
     const cpuH = Math.min(270, cH * 0.52);
     panel(lX, cY, cW, cpuH, 'CPU', `${HW.cpuCores}C / ${HW.cpuThreads}T`, COL.primary);
     {
@@ -1114,7 +1172,7 @@
       ctx.fillText(T.liveConnected ? '● 1:1 TASKMGR LIVE' : `bench: ${T.cpuBenchMs}ms measured`, px, py + 58);
 
       ctx.fillText('core matrix:', px, py + 70);
-      
+      // BUG-M fix: bis zu 16 Threads anzeigen (8 Spalten statt 4 für 16T-CPUs)
       const maxC = Math.min(HW.cpuThreads, 16);
       const cols = maxC > 8 ? 8 : 4;
       const rows = Math.ceil(maxC / cols);
@@ -1138,12 +1196,13 @@
       ctx.restore();
     }
 
+    // Memory Panel
     const ramY = cY + cpuH + 10, ramH = cH - cpuH - 10;
     if (ramH > 65) {
       panel(lX, ramY, cW, ramH, 'Memory', `${HW.ramGB} GiB total`, COL.ram);
       const px = lX + 10, py = ramY + 32;
       ctx.save();
-      const ramUsed = T.ramGBUsed || 0;  
+      const ramUsed = T.ramGBUsed || 0;  // BUG-C/I fix: kein hardcodierter Fallback 9.5
       const ramPct  = T.ramPct || Math.round((ramUsed / HW.ramGB) * 100);
       ctx.font = 'bold 16px monospace'; ctx.fillStyle = COL.ram;
       ctx.textBaseline = 'top'; ctx.textAlign = 'left';
@@ -1156,6 +1215,7 @@
       ctx.restore();
     }
 
+    // ── RECHTER FLÜGEL: GPU & FRAMETIME/AUDIO ─────────────────────────────
     const gpuH = Math.min(270, cH * 0.52);
     panel(rX, cY, cW, gpuH, 'GPU', `${HW.gpuVramGB} GiB VRAM`, COL.secondary);
     {
@@ -1188,6 +1248,7 @@
       ctx.restore();
     }
 
+    // ── RECHTER FLÜGEL UNTEN: AUDIO SPECTRUM ──────────────────────────────
     const audioY = cY + gpuH + 10, audioH = cH - gpuH - 10;
     if (audioH > 65) {
       let maxEq = 0;
@@ -1234,6 +1295,7 @@
       ctx.restore();
     }
 
+    // ── ZENTRUM: GYRO-RING & 3D GAMING-PC HOLOGRAMM ────────────────────────
     const rR  = Math.min(120, centW * 0.30, cH * 0.30);
     const rCX = centX + centW * 0.5, rCY = cY + cH * 0.33;
 
@@ -1255,11 +1317,13 @@
       ctx.restore();
     }
 
+    // ── ZENTRUM UNTEN: SYSINFO & DMESG ────────────────────────────────────
     const nfY = rCY + rR + 18, nfH = cH - (nfY - cY);
     if (nfH > 70 && centW > 160) {
       drawBottomBox(centX, nfY, centW, nfH);
     }
 
+    // ── FOOTER ─────────────────────────────────────────────────────────────
     const fY = bY + bH - FH * 0.5;
     ctx.save();
     ctx.strokeStyle = COL.border; ctx.lineWidth = 1;
@@ -1280,6 +1344,7 @@
     ctx.restore();
   }
 
+  // ── §15 WALLPAPER ENGINE API ─────────────────────────────────────────────
   window.wallpaperPropertyListener = {
     applyUserProperties(props) {
       const p = k => props[k] ? parseWEColor(props[k].value) : null;
@@ -1339,5 +1404,7 @@
   updatePalette();
   lastDrawTime = performance.now();
   requestAnimationFrame(render);
+
+  // ── §16 FIRST-RUN — wird jetzt vom HTML-Modal in index.html übernommen ──
 
 })();

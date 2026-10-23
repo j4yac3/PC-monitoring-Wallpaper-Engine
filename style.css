@@ -33,6 +33,10 @@ html, body {
   display: none;
 }
 
+/* ═══════════════════════════════════════════════════════
+   SETUP MODAL
+   ═══════════════════════════════════════════════════════ */
+
 #apex-setup-modal {
   position: fixed;
   inset: 0;
@@ -70,6 +74,7 @@ html, body {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255,255,255,0.06);
 }
 
+/* Header */
 #apex-setup-header {
   display: flex;
   align-items: center;
@@ -119,6 +124,7 @@ html, body {
   background: rgba(255,255,255,0.08);
 }
 
+/* Divider */
 #apex-setup-divider,
 #apex-setup-divider2 {
   height: 1px;
@@ -126,6 +132,7 @@ html, body {
   margin: 16px 0;
 }
 
+/* Live Hardware Card im Modal */
 .apex-hw-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -190,6 +197,7 @@ html, body {
   white-space: nowrap;
 }
 
+/* Neuer Button: Alles erkannt - Schließen */
 #apex-setup-btn-done {
   width: 100%;
   display: flex;
@@ -220,6 +228,7 @@ html, body {
   transform: translateY(0);
 }
 
+/* Advanced Accordion Toggle */
 #apex-setup-advanced-toggle {
   display: flex;
   justify-content: space-between;
@@ -242,6 +251,7 @@ html, body {
   padding-top: 10px;
 }
 
+/* Info */
 #apex-setup-info {
   font-size: 10px;
   color: rgba(243, 244, 246, 0.60);
@@ -252,6 +262,7 @@ html, body {
   color: #ffffff;
 }
 
+/* Schritte */
 #apex-setup-steps {
   display: flex;
   flex-direction: column;
@@ -285,6 +296,7 @@ html, body {
   color: rgba(243,244,246,0.85);
 }
 
+/* Footer */
 #apex-setup-footer {
   display: flex;
   align-items: center;
@@ -312,3 +324,4 @@ html, body {
 #apex-setup-dismiss:hover {
   color: #ffffff;
 }
+

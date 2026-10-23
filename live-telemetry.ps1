@@ -1,3 +1,4 @@
+# Ultra-Lightweight 0% CPU Task Manager Telemetry Daemon für APEX Wallpaper
 $ErrorActionPreference = 'SilentlyContinue'
 
 Add-Type -AssemblyName System.Diagnostics.PerformanceCounter
@@ -7,6 +8,7 @@ $info = New-Object Microsoft.VisualBasic.Devices.ComputerInfo
 $cpuCounter = New-Object System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total")
 $null = $cpuCounter.NextValue()
 
+# Core Counters für logische Prozessoren
 $coreCount = [Environment]::ProcessorCount
 if (-not $coreCount) { $coreCount = 8 }
 $coreCounters = @()
@@ -16,28 +18,32 @@ for ($i = 0; $i -lt $coreCount; $i++) {
     $coreCounters += $c
 }
 
+# Netzwerk-Adapter wählen (aktiver Adapter mit höchster Linkgeschwindigkeit)
 $netAdapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Sort-Object ReceiveLinkSpeed -Descending | Select-Object -First 1
 $netAdapterName = if ($netAdapter) { $netAdapter.Name } else { $null }
 $netStatsLast = $null
 
+# Dynamische Pfade (funktioniert auf jedem PC, egal wo installiert)
 $scriptDir = $PSScriptRoot
 if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition }
 $localJson = Join-Path $scriptDir "telemetry.json"
 $localJs   = Join-Path $scriptDir "telemetry.js"
 
+# BUG-G/H fix: Verbesserte WE-Pfadsuche via Steam-Registry + libraryfolders.vdf
 $possibleWeRoots = [System.Collections.Generic.List[string]]::new()
 
+# 1. Statische Kandidaten
 $possibleWeRoots.AddRange([string[]]@(
     "$env:USERPROFILE\Documents\Wallpaper Engine",
-    "$env:LOCALAPPDATA\Wallpaper Engine"
+    "$env:LOCALAPPDATA\Wallpaper Engine",
+    "C:\Program Files (x86)\Steam\steamapps\common\wallpaper_engine\projects\myprojects",
+    "D:\Steam\steamapps\common\wallpaper_engine\projects\myprojects",
+    "E:\Steam\steamapps\common\wallpaper_engine\projects\myprojects",
+    "F:\SteamLibrary\steamapps\common\wallpaper_engine\projects\myprojects",
+    "G:\SteamLibrary\steamapps\common\wallpaper_engine\projects\myprojects"
 ))
 
-Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-    $possibleWeRoots.Add("$($_.Root)Program Files (x86)\Steam\steamapps\common\wallpaper_engine\projects\myprojects")
-    $possibleWeRoots.Add("$($_.Root)Steam\steamapps\common\wallpaper_engine\projects\myprojects")
-    $possibleWeRoots.Add("$($_.Root)SteamLibrary\steamapps\common\wallpaper_engine\projects\myprojects")
-}
-
+# 2. Steam-Registry auslesen für alle Steam-Bibliotheken
 try {
     $steamPath = (Get-ItemProperty "HKCU:\Software\Valve\Steam" -Name "SteamPath" -ErrorAction Stop).SteamPath
     if ($steamPath) {
@@ -55,6 +61,7 @@ try {
     }
 } catch {}
 
+# 3. Projekt-Unterverzeichnis finden (enthält index.html UND hardware.js = unser Projekt)
 $weProjectDir = $null
 foreach ($root in $possibleWeRoots) {
     if (-not $root -or -not (Test-Path $root)) { continue }
@@ -69,6 +76,8 @@ foreach ($root in $possibleWeRoots) {
     if ($weProjectDir) { break }
 }
 
+# BUG-H fix: Auch Skriptverzeichnis selbst als WE-Projektverzeichnis nutzen wenn
+# es index.html enthält (lokales Entwicklungsprojekt = häufigster Fall)
 if (-not $weProjectDir -and (Test-Path (Join-Path $scriptDir "index.html"))) {
     $weProjectDir = $scriptDir
 }
@@ -80,6 +89,7 @@ while ($true) {
     Start-Sleep -Milliseconds 1000
 
     $cpu = [math]::Round($cpuCounter.NextValue())
+    # BUG-F fix: @() sichert Array-Typ auch bei Single-Core-VMs (coreCount=1)
     $cores = @($coreCounters | ForEach-Object { [math]::Round($_.NextValue()) })
     if ($cores -isnot [array]) { $cores = @($cores) }
 
@@ -88,15 +98,17 @@ while ($true) {
     $usedGB  = [math]::Round($totalGB - $availGB, 2)
     $ramPct  = [math]::Round(($usedGB / $totalGB) * 100, 1)
 
+    # Netzwerk-Bytes-Delta
     $netDown = 0; $netUp = 0
     if ($netAdapterName) {
         try {
             $stats = Get-NetAdapterStatistics -Name $netAdapterName -ErrorAction SilentlyContinue
             if ($stats -and $netStatsLast) {
+                # BUG-D fix: Clamp auf 0 verhindert negative Werte bei Counter-Overflow/Reset
                 $rxDelta = [math]::Max(0, $stats.ReceivedBytes - $netStatsLast.ReceivedBytes)
                 $txDelta = [math]::Max(0, $stats.SentBytes     - $netStatsLast.SentBytes)
-                $netDown = [math]::Round(($rxDelta * 8) / 1MB, 2)
-                $netUp   = [math]::Round(($txDelta * 8) / 1MB, 2)
+                $netDown = [math]::Round(($rxDelta * 8) / 1MB, 2)  # Mbit/s
+                $netUp   = [math]::Round(($txDelta * 8) / 1MB, 2)  # Mbit/s
             }
             $netStatsLast = $stats
         } catch {}

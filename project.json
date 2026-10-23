@@ -1,49 +1,18 @@
 {
 	"contentrating" : "Everyone",
-	"description" : "Minimalist, high-performance cyberpunk cockpit hardware monitor for Wallpaper Engine. Automatically detects CPU, GPU, RAM, display resolution, and network bandwidth on any PC.",
+	"description" : "Elegantes Hardware-Monitoring Cockpit für Wallpaper Engine. Erkennt automatisch CPU, GPU, RAM und Netzwerk jedes beliebigen Windows-PCs. Führe einmalig 'update-hardware.bat' aus um deine Hardware zu registrieren.",
 	"file" : "index.html",
 	"general" : 
 	{
 		"properties" : 
 		{
-			"setup_trigger" : 
+			"cpu_name_override" : 
 			{
-				"index" : 0,
-				"order" : 100,
-				"text" : "⚙️ Show Hardware Info & Setup Guide",
-				"type" : "bool",
-				"value" : false
-			},
-			"layout_mode" : 
-			{
-				"index" : 1,
-				"options" : 
-				[
-					{
-						"label" : "Centered Floating (Recommended · Desktop icons unobstructed)",
-						"value" : "centered"
-					},
-					{
-						"label" : "Compact Centered (Narrow)",
-						"value" : "compact"
-					},
-					{
-						"label" : "Fullscreen (Spans entire screen width)",
-						"value" : "fullscreen"
-					}
-				],
-				"order" : 101,
-				"text" : "Cockpit Layout",
-				"type" : "combo",
-				"value" : "centered"
-			},
-			"monochrome_mode" : 
-			{
-				"index" : 2,
-				"order" : 102,
-				"text" : "Monochrome Mode (Stealth Black & White)",
-				"type" : "bool",
-				"value" : true
+				"index" : 11,
+				"order" : 111,
+				"text" : "CPU Bezeichnung (Optional)",
+				"type" : "text",
+				"value" : ""
 			},
 			"fps_limit" : 
 			{
@@ -51,63 +20,95 @@
 				"options" : 
 				[
 					{
-						"label" : "30 FPS (Ultra-Lightweight · ~1% CPU · Recommended)",
+						"label" : "30 FPS (Ultra-Leicht · ~1% CPU · Empfohlen)",
 						"value" : "30"
 					},
 					{
-						"label" : "60 FPS (Smooth · Standard)",
+						"label" : "60 FPS (Flüssig · Standard)",
 						"value" : "60"
 					}
 				],
 				"order" : 103,
-				"text" : "Framerate Limit / CPU Usage",
+				"text" : "Bildwiederholrate / CPU-Last",
 				"type" : "combo",
 				"value" : "30"
 			},
-			"schemecolor" : 
+			"gpu_name_override" : 
 			{
-				"order" : 104,
-				"text" : "Primary Accent Color (Pure White / Stealth)",
-				"type" : "color",
-				"value" : "1 1 1"
-			},
-			"hud_secondary_color" : 
-			{
-				"index" : 4,
-				"order" : 105,
-				"text" : "Secondary Accent Color (Platinum Silver)",
-				"type" : "color",
-				"value" : "0.85 0.85 0.85"
-			},
-			"hud_ram_color" : 
-			{
-				"index" : 5,
-				"order" : 106,
-				"text" : "RAM & Memory Color (White)",
-				"type" : "color",
-				"value" : "0.92 0.92 0.92"
-			},
-			"hud_pc_color" : 
-			{
-				"index" : 6,
-				"order" : 107,
-				"text" : "3D PC Hologram Wireframe Color",
-				"type" : "color",
-				"value" : "1 1 1"
+				"index" : 12,
+				"order" : 112,
+				"text" : "GPU Bezeichnung (Optional)",
+				"type" : "text",
+				"value" : ""
 			},
 			"hud_bg_color" : 
 			{
 				"index" : 7,
-				"order" : 108,
-				"text" : "Background Color (Pitch Black)",
+				"order" : 107,
+				"text" : "Hintergrundfarbe (Tiefschwarz / Pitch Black)",
 				"type" : "color",
 				"value" : "0 0 0"
 			},
-			"show_starfield" : 
+			"hud_pc_color" : 
 			{
-				"index" : 8,
-				"order" : 109,
-				"text" : "Cosmic Starfield Background",
+				"index" : 6,
+				"order" : 106,
+				"text" : "3D-PC Hologramm Farbe (Weiß)",
+				"type" : "color",
+				"value" : "1 1 1"
+			},
+			"hud_ram_color" : 
+			{
+				"index" : 5,
+				"order" : 105,
+				"text" : "RAM & Speicherfarbe (Weiß)",
+				"type" : "color",
+				"value" : "0.92 0.92 0.92"
+			},
+			"hud_secondary_color" : 
+			{
+				"index" : 4,
+				"order" : 104,
+				"text" : "Sekundärfarbe (Platin Silber)",
+				"type" : "color",
+				"value" : "0.85 0.85 0.85"
+			},
+			"layout_mode" : 
+			{
+				"index" : 1,
+				"options" : 
+				[
+					{
+						"label" : "Mittig schwebend (Empfohlen · Desktop-Icons frei)",
+						"value" : "centered"
+					},
+					{
+						"label" : "Kompakt zentriert (Extra schmal)",
+						"value" : "compact"
+					},
+					{
+						"label" : "Vollbild (Über die gesamte Bildschirmbreite)",
+						"value" : "fullscreen"
+					}
+				],
+				"order" : 101,
+				"text" : "Cockpit-Layout (Mittig zentriert / Vollbild)",
+				"type" : "combo",
+				"value" : "centered"
+			},
+			"monochrome_mode" : 
+			{
+				"index" : 2,
+				"order" : 102,
+				"text" : "Einfarbiger Monochrom-Modus (Stealth Black & White)",
+				"type" : "bool",
+				"value" : true
+			},
+			"network_display" : 
+			{
+				"index" : 13,
+				"order" : 113,
+				"text" : "Netzwerk-Panel anzeigen",
 				"type" : "bool",
 				"value" : true
 			},
@@ -117,7 +118,7 @@
 				"options" : 
 				[
 					{
-						"label" : "Relaxed (1000 ms · Recommended)",
+						"label" : "Ruhig (1000 ms · Empfohlen)",
 						"value" : "1000"
 					},
 					{
@@ -125,14 +126,45 @@
 						"value" : "500"
 					},
 					{
-						"label" : "Realtime (250 ms)",
+						"label" : "Echtzeit (250 ms)",
 						"value" : "250"
 					}
 				],
-				"order" : 110,
-				"text" : "Telemetry Polling Rate",
+				"order" : 109,
+				"text" : "Aktualisierungsrate",
 				"type" : "combo",
 				"value" : "1000"
+			},
+			"schemecolor" : 
+			{
+				"order" : 4,
+				"text" : "Hauptfarbe (Reines Weiß / Stealth)",
+				"type" : "color",
+				"value" : "1 1 1"
+			},
+			"setup_trigger" : 
+			{
+				"index" : 0,
+				"order" : 100,
+				"text" : "⚙️ Hardware-Info & Setup-Hilfe anzeigen",
+				"type" : "bool",
+				"value" : false
+			},
+			"show_os_info" : 
+			{
+				"index" : 14,
+				"order" : 114,
+				"text" : "OS-Infoleiste anzeigen",
+				"type" : "bool",
+				"value" : true
+			},
+			"show_starfield" : 
+			{
+				"index" : 8,
+				"order" : 108,
+				"text" : "Kosmisches Sternenfeld im Hintergrund",
+				"type" : "bool",
+				"value" : true
 			},
 			"temp_unit" : 
 			{
@@ -148,52 +180,22 @@
 						"value" : "fahrenheit"
 					}
 				],
-				"order" : 111,
-				"text" : "Temperature Unit",
+				"order" : 110,
+				"text" : "Temperatureinheit",
 				"type" : "combo",
 				"value" : "celsius"
-			},
-			"cpu_name_override" : 
-			{
-				"index" : 11,
-				"order" : 112,
-				"text" : "CPU Model Label Override (Optional)",
-				"type" : "text",
-				"value" : ""
-			},
-			"gpu_name_override" : 
-			{
-				"index" : 12,
-				"order" : 113,
-				"text" : "GPU Model Label Override (Optional)",
-				"type" : "text",
-				"value" : ""
-			},
-			"network_display" : 
-			{
-				"index" : 13,
-				"order" : 114,
-				"text" : "Display Network Panel",
-				"type" : "bool",
-				"value" : true
-			},
-			"show_os_info" : 
-			{
-				"index" : 14,
-				"order" : 115,
-				"text" : "Display OS Info Bar",
-				"type" : "bool",
-				"value" : true
 			}
 		},
 		"supportsaudioprocessing" : true
 	},
-	"preview" : "preview.png",
+	"preview" : "preview.jpg",
 	"ratingsex" : "none",
 	"ratingviolence" : "none",
 	"tags" : [ "Technology" ],
-	"title" : "APEX: Universal PC Hardware Monitor",
-	"type" : "web",
+	"title" : "PC Hardware Monitor",
+	"type" : "Web",
 	"version" : 1,
-	"visibility" : "public"
+	"visibility" : "public",
+	"workshopid" : "3824440661",
+	"workshopurl" : "steam://url/CommunityFilePage/3824440661"
 }
